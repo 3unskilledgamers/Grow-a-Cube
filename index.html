@@ -252,6 +252,13 @@ input:checked+.toggle-sl:before{transform:translateX(18px);}
 .adm-tab{background:#0f172a;border:1px solid #334155;color:#94a3b8;border-radius:6px;padding:5px 10px;font-size:10px;font-weight:700;cursor:pointer}
 .adm-tab.active{background:#1e3a5f;color:#60a5fa;border-color:#60a5fa}
 .adm-section{display:none}.adm-section.active{display:block}
+
+.social-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:#334155;font-size:11px}
+.social-divider::before,.social-divider::after{content:'';flex:1;height:1px;background:#1e3a5f}
+.social-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid;margin-bottom:8px;transition:filter .15s}
+.social-btn:hover{filter:brightness(1.15)}
+.btn-google{background:#fff;color:#1a1a1a;border-color:#e2e8f0}
+.btn-apple{background:#000;color:#fff;border-color:#333}
 </style>
 </head>
 <body>
@@ -359,6 +366,10 @@ input:checked+.toggle-sl:before{transform:translateX(18px);}
   <button class="adm-btn" onclick="showEventBanner('💎 DIAMOND RAIN — Diamond Seeds may fall from the sky!','#67e8f9','#0891b2');nightMoon='diamond_moon';isDay=false;notify('💎 Diamond Rain event!',true)">💎 Diamond Rain</button>
   </div>
   <div class="adm-s creator-only"><h4>👑 Creator-Only Events</h4>
+  <div style="display:flex;align-items:center;justify-content:space-between;background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 12px;margin-bottom:8px">
+    <div><div style="font-size:11px;color:#e2e8f0;font-weight:700">🌙 Night Stealing</div><div style="font-size:9px;color:#64748b">Allow players to steal from each other at night</div></div>
+    <label class="toggle-sw"><input type="checkbox" id="steal-toggle" onchange="allowNightStealing=this.checked;notify('🌙 Night stealing: '+(this.checked?'ON':'OFF'),true)"><span class="toggle-sl"></span></label>
+  </div>
   <button class="adm-btn" onclick="SEEDS.forEach(s=>{if(!s.adminOnly&&!s.packOnly)stock[s.id]=999});buildShop();notify('👑 All seeds in stock ×999!',true)" style="background:#1a0a00;border-color:#ffd700;color:#ffd700">♾️ Infinite Stock</button>
   <button class="adm-btn" onclick="money=1e30;lastMoneyCheck=money;notify('👑 Creator: Max money given',true)" style="background:#1a0a00;border-color:#ffd700;color:#ffd700">💰 Max Money</button>
   <button class="adm-btn" onclick="SEEDS.filter(s=>!s.adminOnly&&!s.packOnly).forEach(s=>addI('seeds',s.id,1));renderHB();notify('👑 All seeds given',true)" style="background:#1a0a00;border-color:#ffd700;color:#ffd700">🌱 All Seeds</button>
@@ -413,6 +424,12 @@ input:checked+.toggle-sl:before{transform:translateX(18px);}
       <button class="login-btn" onclick="doSignup()">Create Account →</button>
     </div>
     <div class="login-err" id="login-err"></div>
+    <div class="social-divider">or continue with</div>
+    <button class="social-btn btn-google" onclick="doGoogleLogin()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Sign in with Google
+    </button>
+
   </div>
 </div>
 
@@ -1794,7 +1811,7 @@ function mvTo(npc,dt,spd){const dx=npc.tx-npc.x,dy=npc.ty-npc.y,d=Math.hypot(dx,
 function npcTend(npc){npc.dt-=dtG;mvTo(npc,dtG,NPC_SPD*.75);if(npc.task==='toShop'){if(Math.hypot(SC.x-npc.x,SC.y-npc.y)<40){const av=SEEDS.filter(s=>(stock[s.id]||0)>0&&s.tier<=4);if(av.length){const pick=av[Math.floor(Math.random()*av.length)];stock[pick.id]--;npc.heldSeed=pick.id;}npc.task='toPlot';npc.tx=npc.homeX;npc.ty=npc.homeY;}return;}if(npc.task==='toPlot'){if(Math.hypot(npc.homeX-npc.x,npc.homeY-npc.y)<40){if(npc.heldSeed&&SBI[npc.heldSeed]){let pl=false;for(let r=0;r<2&&!pl;r++)for(let c=0;c<2&&!pl;c++){if(!npc.grid[r][c]){npc.grid[r][c]=makeCell(npc.heldSeed);pl=true;}}npc.heldSeed=null;}npc.task='idle';}return;}if(npc.task==='toSell'){if(Math.hypot(SEC.x-npc.x,SEC.y-npc.y)<40)npc.task='idle';return;}if(npc.dt>0)return;npc.dt=3+Math.random()*3;for(let r=0;r<2;r++)for(let c=0;c<2;c++){const cell=npc.grid[r][c];if(cell&&cell.stage===3){if(cell.regrowsLeft>1)npc.grid[r][c]={...makeCell(cell.seedId),stage:2,regrowsLeft:cell.regrowsLeft-1};else npc.grid[r][c]=null;npc.task='toSell';npc.tx=SEC.x;npc.ty=SEC.y;return;}}for(let r=0;r<2;r++)for(let c=0;c<2;c++){if(!npc.grid[r][c]){npc.task='toShop';npc.tx=SC.x;npc.ty=SC.y;return;}}npc.tx=npc.homeX+(Math.random()*2-1)*30;npc.ty=npc.homeY+(Math.random()*2-1)*30;}
 function npcRoam(npc){npc.dt-=dtG;mvTo(npc,dtG,NPC_SPD*.7);if(npc.dt>0)return;npc.dt=3+Math.random()*4;npc.tx=Math.min(Math.max(npc.homeX+(Math.random()*2-1)*130,40),WW-40);npc.ty=Math.min(Math.max(npc.homeY+(Math.random()*2-1)*130,40),WH-40);}
 function npcTick(npc){
-  if(isDay){npc.targeting=false;npc.tPk=null;if(npc.grid)npcTend(npc);else npcRoam(npc);return;}
+  if(isDay||!allowNightStealing){npc.targeting=false;npc.tPk=null;if(npc.grid)npcTend(npc);else npcRoam(npc);return;}
   if(npc.targeting){
     const d=mvTo(npc,dtG,NPC_SPD);
     if(npc.tPk){const p=pickups.find(pp=>pp.uid===npc.tPk);if(!p){npc.targeting=false;return;}if(d<24){pickups=pickups.filter(pp=>pp.uid!==p.uid);npc.targeting=false;npc.dt=4+Math.random()*3;}return;}
@@ -1826,6 +1843,17 @@ function notify(msg,good=true){const el=document.getElementById('notifs');const 
 function flashSave(){const el=document.getElementById('save-ind');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1200);}
 // ── HUD ────────────────────────────────────────────────────
 function nearestI(){const checks=[{key:'shop',cx:SC.x,cy:SC.y,py:SHOP.y,label:'Open Shop'},{key:'sell',cx:SEC.x,cy:SEC.y,py:SELL.y,label:'Open Sell Area'},{key:'gear',cx:GB.x+GB.w/2,cy:GB.y+GB.h/2,py:GB.y,label:'Open Gear Shop'},{key:'upgrade',cx:UPS.x,cy:UPS.y,py:UPS.y-40,label:'Open Upgrades',rng:UPR}];let best=null,bD=Infinity;checks.forEach(c=>{const rng=c.rng||IR,d=Math.hypot(c.cx-player.x,c.cy-player.y);if(d<rng&&d<bD){bD=d;best=c;}});wildPets.forEach(wp=>{const d=Math.hypot(wp.x-player.x,wp.y-player.y);if(d<65&&d<bD){bD=d;const def=PBYID[wp.defId];best={key:'pet',cx:wp.x,cy:wp.y,py:wp.y-30,label:`Adopt ${def.name} · ${fmt(def.cost)}`,wp};}});
+  // Check base plots for claiming
+  for(let _pi=0;_pi<5;_pi++){
+    const _bp=BASE[_pi+1];
+    const _bpd=Math.hypot(_bp.cx-player.x,_bp.cy-player.y);
+    if(_bpd<100&&_bpd<bD){
+      bD=_bpd;
+      const _claim=plotClaims[_pi];
+      best={key:'claim_plot',plotIndex:_pi,cx:_bp.cx,cy:_bp.cy-NW/2-30,py:_bp.cy-NW/2-46,
+        label:_claim?(_claim.uid===currentUser?.uid?`🏡 Your Farm (Plot ${_pi+1}) — E to manage`:`🏡 ${_claim.username}'s Farm — Press E`):`🏡 Empty Plot — Press E to claim`};
+    }
+  }
   pickups.forEach(pk=>{const d=Math.hypot(pk.x-player.x,pk.y-player.y);if(d<60&&d<bD){bD=d;const lbl=pk.type==='golden'?'Pick up Golden Seed 🌟':pk.type==='rainbow'?'Pick up Rainbow Seed 🌈':'Pick up Diamond Seed 💎';best={key:'pickup',cx:pk.x,cy:pk.y,py:pk.y-30,label:lbl,pk};}});
   // Special one-time diamond seed
   if(!specialDiamondPicked){const sd=Math.hypot(SDIAM_POS.x-player.x,SDIAM_POS.y-player.y);if(sd<60&&sd<bD){bD=sd;best={key:'special_diamond',cx:SDIAM_POS.x,cy:SDIAM_POS.y-30,py:SDIAM_POS.y-48,label:'✨ One-time Diamond Seed — Press E'};}} 
@@ -3862,28 +3890,23 @@ async function doSignup(){
   // ── Try Firebase Auth ──────────────────────────────────────
   if(window._auth){
     try{
-      // Check username not already taken (query DB)
-      const nameSnap=await window._db.ref('usernames/'+user.toLowerCase()).once('value');
-      if(nameSnap.exists()){loginErr('Username already taken');if(signBtn)signBtn.disabled=false;return;}
-
       const email=user.toLowerCase()+'@growacube.game';
+      // Create Firebase Auth account — duplicate email = duplicate username
       const cred=await window._auth.createUserWithEmailAndPassword(email,pass);
       const uid=cred.user.uid;
-
-      // Save profile + reserve username
-      await window._db.ref('users/'+uid+'/profile').set({
-        username:user, isAdmin:false, isMod:false,
-        friendTokens:0, createdAt:Date.now()
-      });
-      await window._db.ref('usernames/'+user.toLowerCase()).set(uid);
-
+      // Write profile and reserve username (user is now authenticated)
+      const profile={username:user,isAdmin:false,isMod:false,friendTokens:0,createdAt:Date.now()};
+      await Promise.all([
+        window._db.ref('users/'+uid+'/profile').set(profile),
+        window._db.ref('usernames/'+user.toLowerCase()).set(uid)
+      ]);
       currentUser={uid,username:user,isAdmin:false,isCreator:false,isMod:false,friendTokens:0};
       if(signBtn)signBtn.disabled=false;
       startGameWithUser();return;
     }catch(e){
       if(e.code==='auth/email-already-in-use'){loginErr('Username already taken');if(signBtn)signBtn.disabled=false;return;}
+      if(e.code==='auth/weak-password'){loginErr('Password must be 6+ characters');if(signBtn)signBtn.disabled=false;return;}
       if(e.code!=='auth/network-request-failed'){loginErr(e.message);if(signBtn)signBtn.disabled=false;return;}
-      // Network failed — fall through to local
     }
   }
 
@@ -4202,7 +4225,8 @@ function drawWeatherZones(){
 
 
 // ── GUILD SYSTEM ──────────────────────────────────────────────
-let myGuild = null; // {name, emblem, members[], treasury, gardenGrid, rank}
+let myGuild = null;
+let allowNightStealing = false; // Creator can toggle per-server // {name, emblem, members[], treasury, gardenGrid, rank}
 
 function createGuild(name, emblem){
   if(myGuild){notify('Already in a guild! Leave first.',false);return;}
@@ -5063,6 +5087,7 @@ function initFirebase(){
     });
   }
 
+  loadPlotClaims();
   notify('🌐 Connected to live server!',true);
   logMsg('🌐 Firebase connected — real-time sync active');
 }
@@ -5099,10 +5124,172 @@ function drawOtherPlayers(){
   });
 }
 
+
+// ── SOCIAL AUTH (Google + Apple) ──────────────────────────────
+async function doGoogleLogin(){
+  if(!window._auth){loginErr('Firebase not connected');return;}
+  try{
+    const provider=new firebase.auth.GoogleAuthProvider();
+    const cred=await window._auth.signInWithPopup(provider);
+    await handleSocialLogin(cred);
+  }catch(e){
+    if(e.code!=='auth/popup-closed-by-user')loginErr(e.message);
+  }
+}
+
+
+
+async function handleSocialLogin(cred){
+  const uid=cred.user.uid;
+  // Check if profile already exists
+  const snap=await window._db.ref('users/'+uid+'/profile').once('value');
+  const profile=snap.val();
+  if(profile&&profile.username){
+    // Returning player
+    currentUser={uid,username:profile.username,isAdmin:profile.isAdmin||false,
+      isCreator:false,isMod:profile.isMod||false,friendTokens:profile.friendTokens||0};
+    startGameWithUser();
+  }else{
+    // New social login — need a username
+    showUsernamePicker(uid,cred.user.displayName||'');
+  }
+}
+
+function showUsernamePicker(uid,suggestedName){
+  document.querySelectorAll('[data-username-picker]').forEach(x=>x.remove());
+  const clean=(suggestedName||'').replace(/[^a-zA-Z0-9]/g,'').slice(0,14);
+  const ov=document.createElement('div');ov.dataset.usernamePicker='1';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2100;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML=`<div style="background:rgba(2,6,23,.98);border:1.5px solid #22c55e;border-radius:20px;padding:32px 36px;width:min(380px,90vw);text-align:center">
+    <div style="font-size:32px;margin-bottom:8px">🌱</div>
+    <div style="font-size:18px;font-weight:800;color:#22c55e;margin-bottom:6px">Choose your username</div>
+    <div style="font-size:12px;color:#64748b;margin-bottom:18px">3-16 characters, letters and numbers only</div>
+    <input id="social-username" class="login-input" placeholder="Username" maxlength="16" value="${clean}" style="text-align:center;font-size:16px;margin-bottom:12px">
+    <div class="login-err" id="social-err" style="margin-bottom:10px"></div>
+    <button onclick="confirmSocialUsername('${uid}')" class="login-btn">Start Playing →</button>
+  </div>`;
+  document.body.appendChild(ov);
+  setTimeout(()=>document.getElementById('social-username')?.focus(),100);
+  document.getElementById('social-username').addEventListener('keydown',e=>{
+    if(e.key==='Enter')confirmSocialUsername(uid);
+  });
+}
+
+async function confirmSocialUsername(uid){
+  const input=document.getElementById('social-username');
+  const errEl=document.getElementById('social-err');
+  const user=(input?.value||'').trim();
+  if(user.length<3||user.length>16){if(errEl)errEl.textContent='Must be 3-16 characters';return;}
+  if(!/^[a-zA-Z0-9]+$/.test(user)){if(errEl)errEl.textContent='Letters and numbers only';return;}
+  if(user.toLowerCase()==='mrtnpe'){if(errEl)errEl.textContent='Username not available';return;}
+  if(errEl)errEl.textContent='Checking…';
+  try{
+    const nameSnap=await window._db.ref('usernames/'+user.toLowerCase()).once('value');
+    if(nameSnap.exists()&&nameSnap.val()!==uid){if(errEl)errEl.textContent='Username already taken';return;}
+    const profile={username:user,isAdmin:false,isMod:false,friendTokens:0,createdAt:Date.now()};
+    await Promise.all([
+      window._db.ref('users/'+uid+'/profile').set(profile),
+      window._db.ref('usernames/'+user.toLowerCase()).set(uid)
+    ]);
+    currentUser={uid,username:user,isAdmin:false,isCreator:false,isMod:false,friendTokens:0};
+    document.querySelectorAll('[data-username-picker]').forEach(x=>x.remove());
+    startGameWithUser();
+  }catch(e){if(errEl)errEl.textContent=e.message;}
+}
+
+
+// ── PLOT CLAIMING SYSTEM ───────────────────────────────────────
+// Players can walk up to one of the 5 hub bases and press E to claim it
+let plotClaims = {}; // {plotIndex: {uid, username, ts}}
+
+function loadPlotClaims(){
+  if(!window._db)return;
+  window._db.ref('servers/'+FIREBASE_SERVER_ID+'/claims').on('value',snap=>{
+    plotClaims=snap.val()||{};
+  });
+}
+
+function claimPlot(plotIndex){
+  if(!currentUser?.uid){notify('Log in to claim a plot!',false);return;}
+  const existing=plotClaims[plotIndex];
+  if(existing&&existing.uid!==currentUser.uid){
+    notify(`❌ This plot is claimed by ${existing.username}!`,false);return;
+  }
+  if(existing&&existing.uid===currentUser.uid){
+    notify('✅ You already own this plot!',true);return;
+  }
+  // Check if player already owns another plot
+  const myPlot=Object.entries(plotClaims).find(([_,c])=>c.uid===currentUser.uid);
+  if(myPlot&&+myPlot[0]!==plotIndex){
+    notify(`❌ You already own Plot ${+myPlot[0]+1}! Release it first before claiming another.`,false);
+    return;
+  }
+
+  const claim={uid:currentUser.uid,username:currentUser.username,ts:Date.now()};
+  if(window._db){
+    window._db.ref('servers/'+FIREBASE_SERVER_ID+'/claims/'+plotIndex).set(claim);
+  }
+  plotClaims[plotIndex]=claim;
+  notify(`🏡 Plot ${plotIndex+1} claimed! This is now ${currentUser.username}'s Farm.`,true);
+  logMsg(`🏡 ${currentUser.username} claimed Plot ${plotIndex+1}`);
+}
+
+function unclaimPlot(plotIndex){
+  if(!currentUser?.uid)return;
+  const existing=plotClaims[plotIndex];
+  if(!existing||existing.uid!==currentUser.uid){notify('You do not own this plot.',false);return;}
+  if(window._db)window._db.ref('servers/'+FIREBASE_SERVER_ID+'/claims/'+plotIndex).remove();
+  delete plotClaims[plotIndex];
+  notify('Plot released.',false);
+}
+
+function openClaimModal(plotIndex){
+  const claim=plotClaims[plotIndex];
+  const isOwner=claim?.uid===currentUser?.uid;
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;display:flex;align-items:center;justify-content:center';
+  const basePos=BASE[plotIndex+1];
+  ov.innerHTML=`<div style="background:#0f172a;border:2px solid #22c55e;border-radius:18px;padding:24px;width:min(340px,90vw);text-align:center">
+    <div style="font-size:28px;margin-bottom:6px">🏡</div>
+    <div style="font-size:16px;font-weight:800;color:#e2e8f0;margin-bottom:4px">Plot ${plotIndex+1}</div>
+    ${claim
+      ?`<div style="font-size:12px;color:#4ade80;margin-bottom:14px">Owned by <strong>${claim.username}</strong></div>`
+      :'<div style="font-size:12px;color:#64748b;margin-bottom:14px">This plot is unclaimed</div>'}
+    ${!claim?`<button onclick="claimPlot(${plotIndex});this.closest('[style*=inset]').remove()" style="background:#22c55e;color:#0a1628;border:none;border-radius:10px;padding:11px;font-weight:800;font-size:13px;cursor:pointer;width:100%;margin-bottom:8px">🏡 Claim this Plot</button>`:''}
+    ${isOwner?`<button onclick="unclaimPlot(${plotIndex});this.closest('[style*=inset]').remove()" style="background:#7f1d1d;color:#fca5a5;border:1px solid #b91c1c;border-radius:10px;padding:9px;font-size:12px;cursor:pointer;width:100%;margin-bottom:8px">Release Plot</button>`:''}
+    <button onclick="this.closest('[style*=inset]').remove()" style="background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:10px;padding:8px;cursor:pointer;font-size:12px;width:100%">Close</button>
+  </div>`;
+  document.body.appendChild(ov);
+}
+
+// Draw plot claim label above each base plot
+function drawClaimLabels(){
+  for(let i=0;i<5;i++){
+    const base=BASE[i+1];
+    const claim=plotClaims[i];
+    const px=base.cx,py=base.cy-NW/2-18;
+    if(!vis(px,py,120))continue;
+    ctx.save();
+    if(claim){
+      const isMe=claim.uid===currentUser?.uid;
+      ctx.font='bold 11px Segoe UI';ctx.textAlign='center';
+      ctx.fillStyle=isMe?'#4ade80':'#60a5fa';
+      ctx.shadowBlur=6;ctx.shadowColor=ctx.fillStyle;
+      ctx.fillText(`🏡 ${claim.username}'s Farm`,px,py);
+      if(isMe){ctx.font='9px Segoe UI';ctx.fillStyle='#22c55e';ctx.shadowBlur=0;ctx.fillText('(your plot)',px,py+13);}
+    }else{
+      ctx.font='10px Segoe UI';ctx.textAlign='center';ctx.fillStyle='#334155';
+      ctx.fillText('Empty Plot — Press E to claim',px,py);
+    }
+    ctx.restore();
+  }
+}
+
 function collectPickup(pk){if(pk.type==='rainbow'){addI('seeds','golden_seed',1);seedToHotbar('golden_seed');notify('🌈 Rainbow Moon drop! Got a ✨ Golden Seed!',true);pickups=pickups.filter(p=>p.uid!==pk.uid);renderHB();saveGame();return;}const id=pk.type+'_seed';addI('seeds',id,1);pickups=pickups.filter(p=>p.uid!==pk.uid);notify(`${pk.type==='golden'?'🌟':'💎'} Picked up ${SPEC_SEEDS[id].name}!`,true);logMsg(`${pk.type==='golden'?'🌟':'💎'} ${SPEC_SEEDS[id].name} collected — plant it for a guaranteed mutation!`);renderHB();saveGame();}
 function onE(){if(anyOpen())return;const n=nearestI();if(!n)return;if(n.key==='shop')openShop();else if(n.key==='sell')openSell();else if(n.key==='gear')openGear();else if(n.key==='upgrade')openUpg();else if(n.key==='pet')openPetBuy(n.wp);else if(n.key==='pickup')collectPickup(n.pk);else if(n.key==='special_diamond'){specialDiamondPicked=true;addI('seeds','diamond_seed',1);seedToHotbar('diamond_seed');notify('💎 Found a rare Diamond Seed! It will never appear here again.',true);logMsg('💎 You found the legendary Diamond Seed hidden near the pond!');renderHB();saveGame();}
   else if(n.key==='wild_biome_pet'){adoptBiomePet(n.pet.petId);wildBiomePets=wildBiomePets.filter(p=>p.uid!==n.pet.uid);}
-    else if(n.key==='weather_zone'){const z=n.zone;if(weather!==z.wx){notify(`🔒 ${z.name} only opens during ${z.wx.replace(/_/g,' ')}!`,false);}else if((weatherZoneCooldowns[z.id]||0)>0){notify(`⏱ ${z.name} cooldown: ${Math.ceil(weatherZoneCooldowns[z.id])}s`,false);}else{z.reward();weatherZoneCooldowns[z.id]=300;saveGame();}}else if(n.key==='biome_return')exitBiome();else if(n.key==='biome_shop'){buildBiomeShop();document.getElementById('shop-modal').classList.add('open');shopOpen=true;}else if(n.key==='biome_sell')openSell();else if(n.key==='biome_convert')openBiomeConvert();else if(n.key==='teleporter'){if(currentBiome)exitBiome();else openBiomeTeleporter();}else if(n.key==='poi'){const poi=n.poi;const cd=POI_COOLDOWNS[poi.id]||0;if(cd>0){notify(`${poi.icon} ${poi.name} on cooldown! ${Math.ceil(cd)}s`,false);}else{POI_COOLDOWNS[poi.id]=120;poi.reward();}}else if(n.key==='wm')openWeatherMachine();else if(n.key==='cosm')openCosm();else if(n.key==='fish')doFish();
+    else if(n.key==='weather_zone'){const z=n.zone;if(weather!==z.wx){notify(`🔒 ${z.name} only opens during ${z.wx.replace(/_/g,' ')}!`,false);}else if((weatherZoneCooldowns[z.id]||0)>0){notify(`⏱ ${z.name} cooldown: ${Math.ceil(weatherZoneCooldowns[z.id])}s`,false);}else{z.reward();weatherZoneCooldowns[z.id]=300;saveGame();}}else if(n.key==='claim_plot')openClaimModal(n.plotIndex)
+  else if(n.key==='biome_return')exitBiome();else if(n.key==='biome_shop'){buildBiomeShop();document.getElementById('shop-modal').classList.add('open');shopOpen=true;}else if(n.key==='biome_sell')openSell();else if(n.key==='biome_convert')openBiomeConvert();else if(n.key==='teleporter'){if(currentBiome)exitBiome();else openBiomeTeleporter();}else if(n.key==='poi'){const poi=n.poi;const cd=POI_COOLDOWNS[poi.id]||0;if(cd>0){notify(`${poi.icon} ${poi.name} on cooldown! ${Math.ceil(cd)}s`,false);}else{POI_COOLDOWNS[poi.id]=120;poi.reward();}}else if(n.key==='wm')openWeatherMachine();else if(n.key==='cosm')openCosm();else if(n.key==='fish')doFish();
   else if(n.key==='wish')doWish();
   else if(n.key==='rock'){if(selItem?.kind==='shovel')tryMineRock(n.idx);else notify('⛏️ Equip your Shovel (slot 1) to mine!',false);}}
 function onTab(){if(shopOpen||gearOpen||sellOpen||upgradeOpen||adminOpen)return;invOpen?closeInv():openInv();}
@@ -5488,8 +5675,8 @@ canvas.addEventListener('click',e=>{
   if(selItem?.kind==='shovel'&&!isDay){const npc=npcAt(wx,wy);if(npc&&npc.targeting&&!npc.tPk&&Math.hypot(npc.x-player.x,npc.y-player.y)<90){hitNpc(npc);return;}}
   // Slingshot hits NPC
   if(!isDay&&getI('gear','slingshot')>0&&selItem?.kind==='gear'&&selItem.id==='slingshot'){const npc=npcAt(wx,wy);if(npc&&npc.targeting&&!npc.tPk){const now=performance.now()/1000;if(now-lastHit<1.1){notify('Slingshot recharging…',false);return;}lastHit=now;hitNpc(npc);return;}}
-  // Blood Moon steal from NPC
-  if(nightMoon==='blood'&&!isDay){for(let i=0;i<5;i++){const npc=npcs[i];if(!npc.grid)continue;if(wx>=npc.plotX&&wx<=npc.plotX+NW&&wy>=npc.plotY&&wy<=npc.plotY+NH){if(Math.hypot(npc.plotX+NW/2-player.x,npc.plotY+NH/2-player.y)>150){notify('Get closer to steal!',false);return;}const c=Math.floor((wx-npc.plotX)/TILE),r=Math.floor((wy-npc.plotY)/TILE);const cell=npc.grid[r]?.[c];if(cell&&cell.stage===3){const val=cellVal(cell);const stolen={seedId:cell.seedId,value:val,sIds:cell.sz?.id||'normal',mIds:(cell.muts||[]).map(m=>m.id),sName:cell.sz?.name||'Normal',mLabels:(cell.muts||[]).map(m=>m.label),name:cellNm(cell),isBlood:true};if(cell.regrowsLeft>1)npc.grid[r][c]={...makeCell(cell.seedId),stage:2,regrowsLeft:cell.regrowsLeft-1};else npc.grid[r][c]=null;if(Math.random()<.25){beams.push({x1:npc.x,y1:npc.y,x2:player.x,y2:player.y,until:Date.now()+400});inv.cubes=inv.cubes.filter(i=>!i.isBlood);notify(`💥 ${npc.name}'s beam zapped you! Lost stolen items!`,false);}else{inv.cubes.push({uid:cUid++,...stolen});notify(`🩸 Stole ${stolen.name} from ${npc.name}! (${fmt(val)})`,true);}saveGame();}else notify('Nothing ripe to steal there!',false);return;}}}
+  // Blood Moon steal — only if Creator has enabled it
+  if(allowNightStealing&&nightMoon==='blood'&&!isDay){for(let i=0;i<5;i++){const npc=npcs[i];if(!npc.grid)continue;if(wx>=npc.plotX&&wx<=npc.plotX+NW&&wy>=npc.plotY&&wy<=npc.plotY+NH){if(Math.hypot(npc.plotX+NW/2-player.x,npc.plotY+NH/2-player.y)>150){notify('Get closer to steal!',false);return;}const c=Math.floor((wx-npc.plotX)/TILE),r=Math.floor((wy-npc.plotY)/TILE);const cell=npc.grid[r]?.[c];if(cell&&cell.stage===3){const val=cellVal(cell);const stolen={seedId:cell.seedId,value:val,sIds:cell.sz?.id||'normal',mIds:(cell.muts||[]).map(m=>m.id),sName:cell.sz?.name||'Normal',mLabels:(cell.muts||[]).map(m=>m.label),name:cellNm(cell),isBlood:true};if(cell.regrowsLeft>1)npc.grid[r][c]={...makeCell(cell.seedId),stage:2,regrowsLeft:cell.regrowsLeft-1};else npc.grid[r][c]=null;if(Math.random()<.25){beams.push({x1:npc.x,y1:npc.y,x2:player.x,y2:player.y,until:Date.now()+400});inv.cubes=inv.cubes.filter(i=>!i.isBlood);notify(`💥 ${npc.name}'s beam zapped you! Lost stolen items!`,false);}else{inv.cubes.push({uid:cUid++,...stolen});notify(`🩸 Stole ${stolen.name} from ${npc.name}! (${fmt(val)})`,true);}saveGame();}else notify('Nothing ripe to steal there!',false);return;}}}
   // Buildings
   if(wx>=SHOP.x&&wx<=SHOP.x+SHOP.w&&wy>=SHOP.y&&wy<=SHOP.y+SHOP.h){if(Math.hypot(SC.x-player.x,SC.y-player.y)<IR)openShop();else notify('Walk closer to the Shop!',false);return;}
   if(wx>=SELL.x&&wx<=SELL.x+SELL.w&&wy>=SELL.y&&wy<=SELL.y+SELL.h){if(Math.hypot(SEC.x-player.x,SEC.y-player.y)<IR)openSell();else notify('Walk closer to the Sell Area!',false);return;}
@@ -5836,6 +6023,7 @@ function render(){
   beams.forEach(b=>{ctx.save();ctx.strokeStyle='#ef4444';ctx.lineWidth=4;ctx.shadowBlur=14;ctx.shadowColor='#ef4444';ctx.beginPath();ctx.moveTo(b.x1,b.y1);ctx.lineTo(b.x2,b.y2);ctx.stroke();ctx.restore();});
   ctx.restore();
   drawOtherPlayers();
+  drawClaimLabels();
   drawTrail();
   drawHeldPlant();
   drawEmote();
